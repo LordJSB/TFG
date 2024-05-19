@@ -7,14 +7,14 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.*;
+import javax.swing.table.TableCellEditor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class MainInterface extends JFrame {
      * Create the frame.
      */
     public MainInterface() {
-        setTitle("Modelo prototipo");
+        setTitle("NOMBRE NO RECOGIDO");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 900, 650);
 
@@ -77,6 +77,7 @@ public class MainInterface extends JFrame {
         }
 
         tablaPpal.setDefaultRenderer(Object.class, new DiagonalCellRenderer());
+        tablaPpal.setDefaultEditor(Object.class, new SpinnerEditor());
         panelPpal.setLayout(null);
         panelPpal.add(tablaPpal);
 
@@ -88,36 +89,14 @@ public class MainInterface extends JFrame {
             }
         });
         panelPpal.add(button);
-
-        // Agregar un KeyListener a la tabla para restringir la entrada de números del 0 al 4
-        tablaPpal.addKeyListener(new KeyListener() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                // No hacer nada en la pulsación de tecla
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                // No hacer nada en la liberación de tecla
-            }
-
-            @Override
-            public void keyTyped(KeyEvent e) {
-                char c = e.getKeyChar();
-                if (!((c >= '0' && c <= '4') || (c == KeyEvent.VK_BACK_SPACE) || (c == KeyEvent.VK_DELETE))) {
-                    getToolkit().beep();
-                    e.consume();
-                }
-            }
-        });
     }
 
     public int[][] getDatosTabla() {
         int rowCount = tablaPpal.getRowCount();
         int columnCount = tablaPpal.getColumnCount();
         int[][] data = new int[rowCount][columnCount];
-        for (int i = 0; i < rowCount; i++) {
-            for (int j = 0; j < columnCount; j++) {
+        for (int i = 1; i < rowCount; i++) {
+            for (int j = 1; j < columnCount; j++) {
                 if (tablaPpal.getValueAt(i, j) != null) {
                     data[i][j] = Integer.parseInt(tablaPpal.getValueAt(i, j).toString());
                 }
@@ -138,6 +117,29 @@ public class MainInterface extends JFrame {
                 c.setBackground(table.getBackground());
             }
             return c;
+        }
+    }
+
+    private class SpinnerEditor extends AbstractCellEditor implements TableCellEditor {
+        private static final long serialVersionUID = 1L;
+        private final JSpinner spinner;
+
+        public SpinnerEditor() {
+            SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 4, 1);
+            spinner = new JSpinner(model);
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return spinner.getValue();
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            if (value != null) {
+                spinner.setValue(value);
+            }
+            return spinner;
         }
     }
 
@@ -173,9 +175,9 @@ public class MainInterface extends JFrame {
 
     private List<List<Integer>> matrizDatos(int[][] tableData) {
         List<List<Integer>> groups = new ArrayList<>();
-        for (int i = 1; i < tableData.length - 1; i++) {
+        for (int i = 1; i < tableData.length; i++) {
             for (int j = i + 1; j < tableData.length; j++) {
-                for (int k = j + 1; j < tableData.length; k++) {
+                for (int k = j + 1; k < tableData.length; k++) {
                     int sum = calculaSum(tableData[i]) + calculaSum(tableData[j]) + calculaSum(tableData[k]);
                     if (sum < 9) {
                         List<Integer> group = new ArrayList<>();
