@@ -1,4 +1,5 @@
 package tfg;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -174,7 +175,7 @@ public class MainInterface extends JFrame {
         List<List<Integer>> groups = new ArrayList<>();
         for (int i = 1; i < tableData.length - 1; i++) {
             for (int j = i + 1; j < tableData.length; j++) {
-                for (int k = j + 1; k < tableData.length; k++) {
+                for (int k = j + 1; j < tableData.length; k++) {
                     int sum = calculaSum(tableData[i]) + calculaSum(tableData[j]) + calculaSum(tableData[k]);
                     if (sum < 9) {
                         List<Integer> group = new ArrayList<>();
