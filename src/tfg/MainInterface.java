@@ -3,11 +3,7 @@ package tfg;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
+
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -55,10 +51,10 @@ public class MainInterface extends JFrame {
         tablaPpal = new JTable();
         tablaPpal.setBounds(10, 10, 600, 400);
         tablaPpal.setModel(new DefaultTableModel(
-                new Object[][] { { "", "1", "2", "3", "4", "5", "6" }, { "1", null, null, null, null, null, null },
-                        { "2", null, null, null, null, null, null }, { "3", null, null, null, null, null, null },
-                        { "4", null, null, null, null, null, null }, { "5", null, null, null, null, null, null },
-                        { "6", null, null, null, null, null, null } },
+                new Object[][] { { "0", "1", "2", "3", "4", "5", "6" }, { "1", 0, null, null, null, null, null },
+                        { "2", null, 0, null, null, null, null }, { "3", null, null, 0, null, null, null },
+                        { "4", null, null, null, 0, null, null }, { "5", null, null, null, null, 0, null },
+                        { "6", null, null, null, null, null, 0 } },
                 new String[] { "", "1", "2", "3", "4", "5", "6" }) {
             private static final long serialVersionUID = 1L;
 
@@ -149,13 +145,26 @@ public class MainInterface extends JFrame {
             return;
         }
         int[][] tableData = getDatosTabla();
-        List<List<Integer>> groups = matrizDatos(tableData);
-
+        List<List<Integer>> groups = new ArrayList<List<Integer>>();
+        for(int[] nums:tableData) {
+        	if(tableData[0]!=nums) {
+        	List<Integer> gr=new ArrayList<Integer>();
+        	for(int i=1; i<nums.length;i++) {
+        		gr.add(nums[i]);
+        	}
+        	groups.add(gr);
+        	}
+        }
+        System.out.println(groups);
+        List<Persona> personas = new ArrayList<Persona> ();
+        for(List<Integer> listaNumeros:groups) {
+        	personas.add(new Persona(groups.indexOf(listaNumeros),""+groups.indexOf(listaNumeros),listaNumeros));
+        }
         StringBuilder message = new StringBuilder();
         message.append("Grupos encontrados:\n");
-        for (int i = 0; i < groups.size(); i++) {
-            message.append("Grupo ").append(i + 1).append(": ").append(groups.get(i)).append("\n");
-        }
+       
+            message.append(Distribucion.distribuir(personas,3,2));
+        
 
         JOptionPane.showMessageDialog(this, message.toString());
     }
