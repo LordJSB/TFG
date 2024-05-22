@@ -1,212 +1,256 @@
 package tfg;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
-
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.*;
-import javax.swing.table.TableCellEditor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+
 public class MainInterface extends JFrame {
 
-    private static final long serialVersionUID = 1L;
-    private JPanel panelPpal;
-    private JTable tablaPpal;
+	private static final long serialVersionUID = 1L;
+	private JPanel panelPpal;
+	private JTable tablaPpal;
 
-    /**
-     * Launch the application.
-     */
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    MainInterface frame = new MainInterface();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					MainInterface frame = new MainInterface(4, 2, 2);
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 
-    /**
-     * Create the frame.
-     */
-    public MainInterface() {
-        setTitle("NOMBRE NO RECOGIDO");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 900, 650);
+	/**
+	 * Create the frame.
+	 */
+	public MainInterface(int numPersonas, int nGrupos, int nLimite) {
+		setTitle("NOMBRE NO RECOGIDO");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setPreferredSize(new Dimension(1200, 900));
+		panelPpal = new JPanel(new BorderLayout());
+		panelPpal.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(panelPpal);
 
-        panelPpal = new JPanel();
-        panelPpal.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(panelPpal);
+		DefaultTableModel model = new DefaultTableModel(numPersonas + 1, numPersonas + 1) {
+			private static final long serialVersionUID = 1L;
 
-        tablaPpal = new JTable();
-        tablaPpal.setBounds(10, 10, 600, 400);
-        tablaPpal.setModel(new DefaultTableModel(
-                new Object[][] { { "0", "1", "2", "3", "4", "5", "6" }, { "1", 0, null, null, null, null, null },
-                        { "2", null, 0, null, null, null, null }, { "3", null, null, 0, null, null, null },
-                        { "4", null, null, null, 0, null, null }, { "5", null, null, null, null, 0, null },
-                        { "6", null, null, null, null, null, 0 } },
-                new String[] { "", "1", "2", "3", "4", "5", "6" }) {
-            private static final long serialVersionUID = 1L;
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				// No editable para celdas en la primera fila (0, n) y primera columna (n, 0)
+				// No editable para celdas diagonales (n, n)
+				if (row == 0 || column == 0 || row == column) {
+					return false;
+				}
+				return true;
+			}
+		};
 
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return !(row == 0 || column == 0 || row == column);
-            }
-        });
+		for (int i = 1; i <= numPersonas; i++) {
+			model.setValueAt("Persona " + i, 0, i);
+			model.setValueAt("Persona " + i, i, 0);
+		}
+		model.setValueAt("PERSONAS", 0, 0);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
-        tablaPpal.setDefaultRenderer(Object.class, centerRenderer);
+		// Poner 0 en cada celda (n, n)
+		for (int i = 1; i <= numPersonas; i++) {
+			model.setValueAt(0, i, i);
+		}
 
-        for (int i = 0; i < tablaPpal.getColumnCount(); i++) {
-            tablaPpal.getColumnModel().getColumn(i).setPreferredWidth(100);
-        }
+		tablaPpal = new JTable(model);
+		tablaPpal.setModel(model);
+		tablaPpal.setDefaultRenderer(Object.class, new DiagonalCellRenderer());
 
-        tablaPpal.setDefaultRenderer(Object.class, new DiagonalCellRenderer());
-        tablaPpal.setDefaultEditor(Object.class, new SpinnerEditor());
-        panelPpal.setLayout(null);
-        panelPpal.add(tablaPpal);
+		// Crear un ComboBox editor para la tabla
+		JComboBox<ComboBoxItem> comboBox = new JComboBox<>();
+		comboBox.addItem(new ComboBoxItem(0, "0 - Indiferencia"));
+		comboBox.addItem(new ComboBoxItem(1, "1 - Muy cercano"));
+		comboBox.addItem(new ComboBoxItem(2, "2 - Cercano"));
+		comboBox.addItem(new ComboBoxItem(3, "3 - Apatia"));
+		comboBox.addItem(new ComboBoxItem(4, "4 - Desprecio"));
 
-        JButton button = new JButton("Botón");
-        button.setBounds(774, 570, 100, 30);
-        button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                creaGrupos();
-            }
-        });
-        panelPpal.add(button);
-    }
+		comboBox.setRenderer(new DefaultListCellRenderer() {
+			private static final long serialVersionUID = 1L;
 
-    public int[][] getDatosTabla() {
-        int rowCount = tablaPpal.getRowCount();
-        int columnCount = tablaPpal.getColumnCount();
-        int[][] data = new int[rowCount][columnCount];
-        for (int i = 1; i < rowCount; i++) {
-            for (int j = 1; j < columnCount; j++) {
-                if (tablaPpal.getValueAt(i, j) != null) {
-                    data[i][j] = Integer.parseInt(tablaPpal.getValueAt(i, j).toString());
-                }
-            }
-        }
-        return data;
-    }
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+					boolean cellHasFocus) {
+				super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				if (value instanceof ComboBoxItem) {
+					setText(((ComboBoxItem) value).toString());
+				}
+				return this;
+			}
+		});
 
-    private class DiagonalCellRenderer extends DefaultTableCellRenderer {
-        private static final long serialVersionUID = 1L;
+		DefaultCellEditor editor = new DefaultCellEditor(comboBox) {
+			private static final long serialVersionUID = 1L;
 
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-                int row, int column) {
-            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            if (row == column) {
-                c.setBackground(new Color(200, 200, 200));
-            } else {
-                c.setBackground(table.getBackground());
-            }
-            return c;
-        }
-    }
+			@Override
+			public Object getCellEditorValue() {
+				ComboBoxItem item = (ComboBoxItem) super.getCellEditorValue();
+				return item.getValor();
+			}
+		};
 
-    private class SpinnerEditor extends AbstractCellEditor implements TableCellEditor {
-        private static final long serialVersionUID = 1L;
-        private final JSpinner spinner;
+		JScrollPane scrollPane = new JScrollPane(tablaPpal);
+		tablaPpal.setDefaultEditor(Object.class, editor);
 
-        public SpinnerEditor() {
-            SpinnerNumberModel model = new SpinnerNumberModel(0, 0, 4, 1);
-            spinner = new JSpinner(model);
-        }
+		panelPpal.add(scrollPane, BorderLayout.CENTER);
 
-        @Override
-        public Object getCellEditorValue() {
-            return spinner.getValue();
-        }
+		JButton btnDistribuir = new JButton("Calcular grupos");
+		btnDistribuir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				creaGrupos(nGrupos, nLimite);
+			}
+		});
+		panelPpal.add(btnDistribuir, BorderLayout.SOUTH);
 
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            if (value != null) {
-                spinner.setValue(value);
-            }
-            return spinner;
-        }
-    }
+		int tamanioColumna = 70;
+		TableColumn firstColumn = tablaPpal.getColumnModel().getColumn(0);
+		firstColumn.setPreferredWidth(tamanioColumna);
 
-    private void creaGrupos() {
-        if (siCeldaVacia()) {
-            JOptionPane.showMessageDialog(this, "Falta ingresar datos en la tabla.");
-            return;
-        }
-        int[][] tableData = getDatosTabla();
-        List<List<Integer>> groups = new ArrayList<List<Integer>>();
-        for(int[] nums:tableData) {
-        	if(tableData[0]!=nums) {
-        	List<Integer> gr=new ArrayList<Integer>();
-        	for(int i=1; i<nums.length;i++) {
-        		gr.add(nums[i]);
-        	}
-        	groups.add(gr);
-        	}
-        }
-        System.out.println(groups);
-        List<Persona> personas = new ArrayList<Persona> ();
-        for(List<Integer> listaNumeros:groups) {
-        	personas.add(new Persona(groups.indexOf(listaNumeros),""+groups.indexOf(listaNumeros),listaNumeros));
-        }
-        StringBuilder message = new StringBuilder();
-        message.append("Grupos encontrados:\n");
-       
-            message.append(Distribucion.distribuir(personas,3,2));
-        
+		// Establecer anchura mínima de la primera celda de cada columna
+		for (int i = 1; i < tablaPpal.getColumnCount(); i++) {
+			TableColumn columna = tablaPpal.getColumnModel().getColumn(i);
+			columna.setPreferredWidth(tamanioColumna);
+		}
 
-        JOptionPane.showMessageDialog(this, message.toString());
-    }
+		pack(); // Ajusta el tamaño de la ventana automáticamente
+		setLocationRelativeTo(null); // Centra la ventana en la pantalla
+	}
 
-    private boolean siCeldaVacia() {
-        int rowCount = tablaPpal.getRowCount();
-        int columnCount = tablaPpal.getColumnCount();
-        for (int i = 1; i < rowCount; i++) {
-            for (int j = 1; j < columnCount; j++) {
-                if (tablaPpal.getValueAt(i, j) == null) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	public int[][] getDatosTabla() {
+		int rowCount = tablaPpal.getRowCount();
+		int columnCount = tablaPpal.getColumnCount();
+		int[][] data = new int[rowCount][columnCount];
+		for (int i = 1; i < rowCount; i++) {
+			for (int j = 1; j < columnCount; j++) {
+				if (tablaPpal.getValueAt(i, j) != null) {
+					data[i][j] = Integer.parseInt(tablaPpal.getValueAt(i, j).toString());
+				}
+			}
+		}
+		return data;
+	}
 
-    private List<List<Integer>> matrizDatos(int[][] tableData) {
-        List<List<Integer>> groups = new ArrayList<>();
-        for (int i = 1; i < tableData.length; i++) {
-            for (int j = i + 1; j < tableData.length; j++) {
-                for (int k = j + 1; k < tableData.length; k++) {
-                    int sum = calculaSum(tableData[i]) + calculaSum(tableData[j]) + calculaSum(tableData[k]);
-                    if (sum < 9) {
-                        List<Integer> group = new ArrayList<>();
-                        group.add(i);
-                        group.add(j);
-                        group.add(k);
-                        groups.add(group);
-                    }
-                }
-            }
-        }
+	private class DiagonalCellRenderer extends DefaultTableCellRenderer {
+		private static final long serialVersionUID = 1L;
 
-        return groups;
-    }
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			if (row == column) {
+				c.setBackground(Color.DARK_GRAY);
+			} else {
+				c.setBackground(table.getBackground());
+			}
+			return c;
+		}
+	}
 
-    private int calculaSum(int[] row) {
-        int sum = 0;
-        for (int value : row) {
-            sum += value;
-        }
-        return sum;
-    }
+	private void creaGrupos(int nGrupos, int nLimite) {
+		if (siCeldaVacia()) {
+			JOptionPane.showMessageDialog(this, "Falta ingresar datos en la tabla.");
+			return;
+		}
+		int[][] tableData = getDatosTabla();
+		List<List<Integer>> groups = new ArrayList<List<Integer>>();
+		for (int[] nums : tableData) {
+			if (tableData[0] != nums) {
+				List<Integer> gr = new ArrayList<Integer>();
+				for (int i = 1; i < nums.length; i++) {
+					gr.add(nums[i]);
+				}
+				groups.add(gr);
+			}
+		}
+		System.out.println(groups);
+		List<Persona> personas = new ArrayList<Persona>();
+		for (List<Integer> listaNumeros : groups) {
+			personas.add(new Persona(groups.indexOf(listaNumeros), "" + groups.indexOf(listaNumeros), listaNumeros));
+		}
+		StringBuilder message = new StringBuilder();
+		message.append("Organización óptima:\n");
+
+		message.append(Distribucion.distribuir(personas, nGrupos, nLimite));
+
+		JOptionPane.showMessageDialog(this, message.toString());
+	}
+
+	private boolean siCeldaVacia() {
+		int rowCount = tablaPpal.getRowCount();
+		int columnCount = tablaPpal.getColumnCount();
+		for (int i = 1; i < rowCount; i++) {
+			for (int j = 1; j < columnCount; j++) {
+				if (tablaPpal.getValueAt(i, j) == null) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }
+
+class ComboBoxItem {
+	private int valor;
+	private String tapadera;
+
+	public ComboBoxItem(int valor, String tapadera) {
+		this.valor = valor;
+		this.tapadera = tapadera;
+	}
+
+	public int getValor() {
+		return valor;
+	}
+
+	@Override
+	public String toString() {
+		return tapadera;
+	}
+}
+//private List<List<Integer>> matrizDatos(int[][] tableData) {
+//  List<List<Integer>> groups = new ArrayList<>();
+//  for (int i = 1; i < tableData.length; i++) {
+//      for (int j = i + 1; j < tableData.length; j++) {
+//          for (int k = j + 1; k < tableData.length; k++) {
+//              int sum = calculaSum(tableData[i]) + calculaSum(tableData[j]) + calculaSum(tableData[k]);
+//              if (sum < 9) {
+//                  List<Integer> group = new ArrayList<>();
+//                  group.add(i);
+//                  group.add(j);
+//                  group.add(k);
+//                  groups.add(group);
+//              }
+//          }
+//      }
+//  }
+//
+//  return groups;
+//}
+//
+//private int calculaSum(int[] row) {
+//  int sum = 0;
+//  for (int value : row) {
+//      sum += value;
+//  }
+//  return sum;
+//}
