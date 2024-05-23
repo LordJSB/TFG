@@ -30,7 +30,7 @@ public class MainInterface extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					MainInterface frame = new MainInterface(4, 2, 2); // Testing. NO DEBE SALIR
+					MainInterface frame = new MainInterface("NombreDeEjemplo", 4, 2, 2); // Testing. NO DEBE SALIR
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -42,7 +42,7 @@ public class MainInterface extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public MainInterface(int numPersonas, int nGrupos, int nLimite) {
+	public MainInterface(String nombreAutor, int numPersonas, int nGrupos, int nLimite) {
 		setTitle("NOMBRE NO RECOGIDO");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(1200, 900));
@@ -117,8 +117,10 @@ public class MainInterface extends JFrame {
 		JButton btnDistribuir = new JButton("Calcular grupos");
 		btnDistribuir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				creaGrupos(nGrupos, nLimite);
-				//crearArchivoXML();
+				List<Grupo> grupos = creaGrupos(nGrupos, nLimite);
+				if (grupos != null) {
+					guardarInformeXML(nombreAutor, numPersonas, grupos);
+				}
 			}
 		});
 		panelPpal.add(btnDistribuir, BorderLayout.SOUTH);
@@ -166,20 +168,20 @@ public class MainInterface extends JFrame {
 		}
 	}
 
-	private void rellenarValoresAleatorios() {
-		Random random = new Random();
-		int rowCount = tablaPpal.getRowCount();
-		int columnCount = tablaPpal.getColumnCount();
-
-		for (int i = 1; i < rowCount; i++) {
-			for (int j = 1; j < columnCount; j++) {
-				if (i != j) { // No rellenar la diagonal
-					int valorAleatorio = random.nextInt(5); // Valores entre 0 y 4
-					tablaPpal.setValueAt(valorAleatorio, i, j);
-				}
-			}
-		}
-	}
+//    private void rellenarValoresAleatorios() {
+//        Random random = new Random();
+//        int rowCount = tablaPpal.getRowCount();
+//        int columnCount = tablaPpal.getColumnCount();
+//
+//        for (int i = 1; i < rowCount; i++) {
+//            for (int j = 1; j < columnCount; j++) {
+//                if (i != j) { // No rellenar la diagonal
+//                    int valorAleatorio = random.nextInt(5); // Valores entre 0 y 4
+//                    tablaPpal.setValueAt(valorAleatorio, i, j);
+//                }
+//            }
+//        }
+//    }
 
 	private void rellenarCeros() {
 		int rowCount = tablaPpal.getRowCount();
@@ -195,34 +197,45 @@ public class MainInterface extends JFrame {
 		}
 	}
 
-	private void creaGrupos(int nGrupos, int nLimite) {
+	private List<Grupo> creaGrupos(int nGrupos, int nLimite) {
 		if (siCeldaVacia()) {
 			JOptionPane.showMessageDialog(this, "Falta ingresar datos en la tabla.");
-			return;
+			return null;
 		}
 		int[][] tableData = getDatosTabla();
-		List<List<Integer>> groups = new ArrayList<List<Integer>>();
+		List<List<Integer>> groups = new ArrayList<>();
 		for (int[] nums : tableData) {
 			if (tableData[0] != nums) {
-				List<Integer> gr = new ArrayList<Integer>();
+				List<Integer> gr = new ArrayList<>();
 				for (int i = 1; i < nums.length; i++) {
 					gr.add(nums[i]);
 				}
 				groups.add(gr);
 			}
 		}
-		System.out.println(groups);
-		List<Persona> personas = new ArrayList<Persona>();
+
+		// Crear personas
+		List<Persona> personas = new ArrayList<>();
 		for (List<Integer> listaNumeros : groups) {
 			int numero = groups.indexOf(listaNumeros) + 1;
-			personas.add(new Persona(groups.indexOf(listaNumeros), "" + numero, listaNumeros));
+			personas.add(new Persona(groups.indexOf(listaNumeros), "Persona " + numero, listaNumeros));
 		}
+
+		// Distribuir personas en grupos
+		DisposicionGrupal disposicion = Distribucion.distribuir(personas, nGrupos, nLimite);
+
+		// Extraer los grupos de la disposición
+		List<Grupo> gruposGenerados = disposicion.getListaGrupos();
+
 		StringBuilder message = new StringBuilder();
 		message.append("Organización óptima:\n");
-
-		message.append(Distribucion.distribuir(personas, nGrupos, nLimite));
-
+		for (Grupo grupo : gruposGenerados) {
+			message.append(grupo.toString()).append("\n");
+		}
+		message.append("\nSe ha creado un archivo 'informe.xml' en la ruta del proyecto:");
 		JOptionPane.showMessageDialog(this, message.toString());
+
+		return gruposGenerados;
 	}
 
 	private boolean siCeldaVacia() {
@@ -236,6 +249,12 @@ public class MainInterface extends JFrame {
 			}
 		}
 		return false;
+	}
+
+	private void guardarInformeXML(String nombre, int participantes, List<Grupo> grupos) {
+		Informe informe = new Informe(nombre, participantes);
+		informe.guardarParticipantesEnGrupos(grupos);
+
 	}
 }
 

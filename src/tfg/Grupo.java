@@ -38,6 +38,10 @@ public class Grupo {
 	public Persona getPersona(int i) {
 		return listaPersonas.get(i);
 	}
+	
+	public void removePersona(Persona persona) {
+	    listaPersonas.remove(persona);
+	}
 
 	@Override
 	public String toString() {
@@ -50,6 +54,6 @@ public class Grupo {
 			string.setLength(string.length() - 2); // Quita comas y espacios
 		}
 		string.append("]");
-		return string + "| M_t=" + calcularMedia();
+		return string + "| Media del grupo: " + calcularMedia();
 	}
 }

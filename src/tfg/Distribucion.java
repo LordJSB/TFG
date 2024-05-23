@@ -60,27 +60,44 @@ public class Distribucion {
 	}
 
 	private static void generateCombinations(List<Persona> numbers, int index, DisposicionGrupal currentCombination,
-			List<DisposicionGrupal> result, int limitPerGroup) {
-		if (index == numbers.size()) {
-			DisposicionGrupal combination = new DisposicionGrupal();
-			for (Grupo group : currentCombination.getListaGrupos()) {
-				combination.addGrupo(group);
-			}
-			result.add(combination);
-			return;
-		}
+	        List<DisposicionGrupal> result, int limitPerGroup) {
+	    if (index == numbers.size()) {
+	        // Verificar si cada persona aparece solo una vez en la combinación actual
+	        boolean todasUnaVez = true;
+	        for (Persona persona : numbers) {
+	            int apariciones = 0;
+	            for (Grupo grupo : currentCombination.getListaGrupos()) {
+	                if (grupo.getListaPersonas().contains(persona)) {
+	                    apariciones++;
+	                }
+	            }
+	            if (apariciones != 1) {
+	                todasUnaVez = false;
+	                break;
+	            }
+	        }
+	        // Si todas las personas aparecen una vez, agregar la combinación al resultado
+	        if (todasUnaVez) {
+	            DisposicionGrupal combination = new DisposicionGrupal();
+	            for (Grupo group : currentCombination.getListaGrupos()) {
+	                combination.addGrupo(group);
+	            }
+	            result.add(combination);
+	        }
+	        return;
+	    }
 
-		Persona currentNumber = numbers.get(index);
-		for (int i = 0; i < currentCombination.getListaGrupos().size(); i++) {
-			if (currentCombination.getGrupo(i).getListaPersonas().size() < limitPerGroup) { // Limitar a 'limitPerGroup'
-																							// nÃºmeros por subgrupo
-				currentCombination.getGrupo(i).addPersona(currentNumber);
-				generateCombinations(numbers, index + 1, currentCombination, result, limitPerGroup);
-				currentCombination.getGrupo(i).getListaPersonas()
-						.remove(currentCombination.getGrupo(i).getListaPersonas().size() - 1);
-			}
-		}
+	    Persona currentNumber = numbers.get(index);
+	    for (int i = 0; i < currentCombination.getListaGrupos().size(); i++) {
+	        if (currentCombination.getGrupo(i).getListaPersonas().size() < limitPerGroup) { // Limitar a 'limitPerGroup' números por subgrupo
+	            currentCombination.getGrupo(i).addPersona(currentNumber);
+	            generateCombinations(numbers, index + 1, currentCombination, result, limitPerGroup);
+	            currentCombination.getGrupo(i).getListaPersonas()
+	                    .remove(currentCombination.getGrupo(i).getListaPersonas().size() - 1);
+	        }
+	    }
 	}
+
 
 	private static List<DisposicionGrupal> filterCombinations(List<DisposicionGrupal> combinations, double minRange,
 			double maxRange) {
@@ -108,33 +125,33 @@ public class Distribucion {
 	}
 
 	public static void crearArchivoXML(List<Grupo> grupos, Informe informe) {
-        try {
-            File file = new File("informe.xml");
-            FileWriter writer = new FileWriter(file);
+	    try {
+	        File file = new File("informe.xml");
+	        FileWriter writer = new FileWriter(file);
 
-            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            writer.write("<informe>\n");
-            writer.write("  <autor>" + informe.getNombre() + "</autor>\n");
-            writer.write("  <participantes>" + informe.getValor() + "</participantes>\n");
-            writer.write("  <grupos>\n");
+	        writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+	        writer.write("<informe>\n");
+	        writer.write("  <autor>" + informe.getNombre() + "</autor>\n");
+	        writer.write("  <participantes>" + informe.getValor() + "</participantes>\n");
+	        writer.write("  <grupos>\n");
 
-            for (Grupo grupo : grupos) {
-                writer.write("    <grupo>\n");
-                writer.write("      <participante>\n");
-                for (Persona persona : grupo.getListaPersonas()) {
-                    writer.write("        <nombre>" + persona.getNombre() + "</nombre>\n");
-                }
-                writer.write("      </participante>\n");
-                writer.write("    </grupo>\n");
-            }
+	        for (Grupo grupo : grupos) {
+	            writer.write("    <grupo>\n");
+	            for (Persona persona : grupo.getListaPersonas()) {
+	                writer.write("      <participante>\n");
+	                writer.write("        <nombre>" + persona.getNombre() + "</nombre>\n");
+	                writer.write("      </participante>\n");
+	            }
+	            writer.write("    </grupo>\n");
+	        }
 
-            writer.write("  </grupos>\n");
-            writer.write("</informe>");
+	        writer.write("  </grupos>\n");
+	        writer.write("</informe>");
 
-            writer.close();
-            System.out.println("El archivo XML se ha creado correctamente.");
-        } catch (IOException e) {
-            System.out.println("Error al crear el archivo XML: " + e.getMessage());
-        }
-    }
+	        writer.close();
+	        System.out.println("El archivo XML se ha creado correctamente.");
+	    } catch (IOException e) {
+	        System.out.println("Error al crear el archivo XML: " + e.getMessage());
+	    }
+	}
 }

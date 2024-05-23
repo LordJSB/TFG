@@ -159,29 +159,32 @@ public class WelcomeInterface extends JFrame {
 		int gruposOptimos = (int) Math.ceil((double) participantes / nLimite);
 		int tamanioOptimo = (int) Math.ceil((double) participantes / nGrupos);
 		if (nGrupos > gruposOptimos || nLimite > tamanioOptimo) {
-			Object[] options = {"Optimizar grupos", "Optimizar tamaño", "No"};
+			Object[] options = { "Optimizar grupos", "Optimizar tamaño", "No" };
 			int respuesta = JOptionPane.showOptionDialog(this,
 					"El número de grupos ingresado o el tamaño de los grupos es mayor al óptimo. Crear grupos descompensados puede afectar la organización.\n"
-							+ "¿Desea optimizar el número de grupos a " + gruposOptimos + " o el tamaño de los grupos a " + tamanioOptimo + "?",
-					"Optimizar grupos/tamaño",
-					JOptionPane.YES_NO_CANCEL_OPTION,
-					JOptionPane.QUESTION_MESSAGE,
-					null,
-					options,
-					options[2]);
+							+ "¿Desea optimizar el número de grupos a " + gruposOptimos
+							+ " o el tamaño de los grupos a " + tamanioOptimo + "?",
+					"Optimizar grupos o tamaño", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+					options, options[2]);
 
 			if (respuesta == JOptionPane.YES_OPTION) {
 				nGrupos = gruposOptimos;
 			} else if (respuesta == JOptionPane.NO_OPTION) {
 				nLimite = tamanioOptimo;
-			} else if (respuesta == JOptionPane.CANCEL_OPTION) {
-				// No hacer nada, continuar con los valores actuales
 			}
 		}
 
-		Informe informe = new Informe(nombre, participantes);
-		JOptionPane.showMessageDialog(this, "Datos guardados:\n" + informe);
-		MainInterface mainInterface = new MainInterface(participantes, nGrupos, nLimite);
+		JOptionPane.showMessageDialog(this,
+				"Ahora se procederá a establecer el nivel de animosidad entre los diferentes participantes. "
+				+ "\nSe mostrará una tabla con cada uno de ellos en una fila y columna, de tal manera que la columna del Invitado 1 "
+				+ "mostrará su nivel de animosidad con el resto de participantes y lo mismo sucederá con las filas. "
+				+ "\nDichos niveles están definidos como:"
+				+ "\n- 1: Gran apego con la otra persona, busca mantenerse en el mismo grupo en la medida de lo posible."
+				+ "\n- 2: Hay lazos de amistad o cordialidad con la otra persona"
+				+ "\n- 3: Aunque no se agraden en gran medida, pueden compartir espacio de manera respetuosa"
+				+ "\n- 4: Buscan mantenerse alejados unos de otros por todos los medios"
+				+ "\n- 0: Indiferencia por desconocimiento entre las personas u otro motivo");
+		MainInterface mainInterface = new MainInterface(nombre, participantes, nGrupos, nLimite);
 		mainInterface.setTitle("Organización del evento de " + nombre);
 		mainInterface.setVisible(true);
 		dispose();

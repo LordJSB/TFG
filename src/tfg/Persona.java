@@ -34,7 +34,7 @@ public class Persona {
 
 	@Override
 	public String toString() {
-		return "Persona " + nombre;
+		return nombre;
 	}
 
 	public int getId() {
