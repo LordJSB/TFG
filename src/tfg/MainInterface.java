@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -29,7 +30,7 @@ public class MainInterface extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					MainInterface frame = new MainInterface(4, 2, 2);
+					MainInterface frame = new MainInterface(4, 2, 2); // Testing. NO DEBE SALIR
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -67,7 +68,6 @@ public class MainInterface extends JFrame {
 			model.setValueAt("Persona " + i, 0, i);
 			model.setValueAt("Persona " + i, i, 0);
 		}
-		model.setValueAt("PERSONAS", 0, 0);
 
 		// Poner 0 en cada celda (n, n)
 		for (int i = 1; i <= numPersonas; i++) {
@@ -112,13 +112,13 @@ public class MainInterface extends JFrame {
 
 		JScrollPane scrollPane = new JScrollPane(tablaPpal);
 		tablaPpal.setDefaultEditor(Object.class, editor);
-
 		panelPpal.add(scrollPane, BorderLayout.CENTER);
 
 		JButton btnDistribuir = new JButton("Calcular grupos");
 		btnDistribuir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				creaGrupos(nGrupos, nLimite);
+				//crearArchivoXML();
 			}
 		});
 		panelPpal.add(btnDistribuir, BorderLayout.SOUTH);
@@ -132,7 +132,7 @@ public class MainInterface extends JFrame {
 			TableColumn columna = tablaPpal.getColumnModel().getColumn(i);
 			columna.setPreferredWidth(tamanioColumna);
 		}
-
+		rellenarCeros();
 		pack(); // Ajusta el tamaño de la ventana automáticamente
 		setLocationRelativeTo(null); // Centra la ventana en la pantalla
 	}
@@ -166,6 +166,35 @@ public class MainInterface extends JFrame {
 		}
 	}
 
+	private void rellenarValoresAleatorios() {
+		Random random = new Random();
+		int rowCount = tablaPpal.getRowCount();
+		int columnCount = tablaPpal.getColumnCount();
+
+		for (int i = 1; i < rowCount; i++) {
+			for (int j = 1; j < columnCount; j++) {
+				if (i != j) { // No rellenar la diagonal
+					int valorAleatorio = random.nextInt(5); // Valores entre 0 y 4
+					tablaPpal.setValueAt(valorAleatorio, i, j);
+				}
+			}
+		}
+	}
+
+	private void rellenarCeros() {
+		int rowCount = tablaPpal.getRowCount();
+		int columnCount = tablaPpal.getColumnCount();
+
+		for (int i = 1; i < rowCount; i++) {
+			for (int j = 1; j < columnCount; j++) {
+				if (i != j) { // No rellenar la diagonal
+					int valorAleatorio = 0;
+					tablaPpal.setValueAt(valorAleatorio, i, j);
+				}
+			}
+		}
+	}
+
 	private void creaGrupos(int nGrupos, int nLimite) {
 		if (siCeldaVacia()) {
 			JOptionPane.showMessageDialog(this, "Falta ingresar datos en la tabla.");
@@ -185,7 +214,8 @@ public class MainInterface extends JFrame {
 		System.out.println(groups);
 		List<Persona> personas = new ArrayList<Persona>();
 		for (List<Integer> listaNumeros : groups) {
-			personas.add(new Persona(groups.indexOf(listaNumeros), "" + groups.indexOf(listaNumeros), listaNumeros));
+			int numero = groups.indexOf(listaNumeros) + 1;
+			personas.add(new Persona(groups.indexOf(listaNumeros), "" + numero, listaNumeros));
 		}
 		StringBuilder message = new StringBuilder();
 		message.append("Organización óptima:\n");
@@ -227,30 +257,3 @@ class ComboBoxItem {
 		return tapadera;
 	}
 }
-//private List<List<Integer>> matrizDatos(int[][] tableData) {
-//  List<List<Integer>> groups = new ArrayList<>();
-//  for (int i = 1; i < tableData.length; i++) {
-//      for (int j = i + 1; j < tableData.length; j++) {
-//          for (int k = j + 1; k < tableData.length; k++) {
-//              int sum = calculaSum(tableData[i]) + calculaSum(tableData[j]) + calculaSum(tableData[k]);
-//              if (sum < 9) {
-//                  List<Integer> group = new ArrayList<>();
-//                  group.add(i);
-//                  group.add(j);
-//                  group.add(k);
-//                  groups.add(group);
-//              }
-//          }
-//      }
-//  }
-//
-//  return groups;
-//}
-//
-//private int calculaSum(int[] row) {
-//  int sum = 0;
-//  for (int value : row) {
-//      sum += value;
-//  }
-//  return sum;
-//}

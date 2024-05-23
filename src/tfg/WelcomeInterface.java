@@ -42,7 +42,7 @@ public class WelcomeInterface extends JFrame {
 	 * Create the frame.
 	 */
 	public WelcomeInterface() {
-		setTitle("Inicio de la aplicaci\u00F3n");
+		setTitle("Inicio de la aplicación");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -63,7 +63,7 @@ public class WelcomeInterface extends JFrame {
 		contentPane.add(tFNombre);
 		tFNombre.setColumns(10);
 
-		JLabel lblValor = new JLabel("Participantes (6-50):");
+		JLabel lblValor = new JLabel("Participantes (6-25):");
 		lblValor.setBounds(25, 142, 115, 14);
 		contentPane.add(lblValor);
 
@@ -151,15 +151,32 @@ public class WelcomeInterface extends JFrame {
 			return;
 		}
 
-		if (nGrupos * nLimite != participantes) {
-			JOptionPane.showMessageDialog(this,
-					"El producto de número de grupos y límite de personas no coincide con el número de participantes totales. Revise los datos insertados");
+		if (participantes < 6 || participantes > 25) {
+			JOptionPane.showMessageDialog(this, "El límite de participantes es entre 6 y 25");
 			return;
 		}
 
-		if (participantes < 6 || participantes > 50) {
-			JOptionPane.showMessageDialog(this, "El límite de participantes es entre 6 y 50");
-			return;
+		int gruposOptimos = (int) Math.ceil((double) participantes / nLimite);
+		int tamanioOptimo = (int) Math.ceil((double) participantes / nGrupos);
+		if (nGrupos > gruposOptimos || nLimite > tamanioOptimo) {
+			Object[] options = {"Optimizar grupos", "Optimizar tamaño", "No"};
+			int respuesta = JOptionPane.showOptionDialog(this,
+					"El número de grupos ingresado o el tamaño de los grupos es mayor al óptimo. Crear grupos descompensados puede afectar la organización.\n"
+							+ "¿Desea optimizar el número de grupos a " + gruposOptimos + " o el tamaño de los grupos a " + tamanioOptimo + "?",
+					"Optimizar grupos/tamaño",
+					JOptionPane.YES_NO_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null,
+					options,
+					options[2]);
+
+			if (respuesta == JOptionPane.YES_OPTION) {
+				nGrupos = gruposOptimos;
+			} else if (respuesta == JOptionPane.NO_OPTION) {
+				nLimite = tamanioOptimo;
+			} else if (respuesta == JOptionPane.CANCEL_OPTION) {
+				// No hacer nada, continuar con los valores actuales
+			}
 		}
 
 		Informe informe = new Informe(nombre, participantes);

@@ -20,7 +20,7 @@ public class Grupo {
 		for (Persona persona : listaPersonas) {
 			sum += persona.calcularTension(listaPersonas);
 		}
-		return listaPersonas.isEmpty() ? 0 : sum / listaPersonas.size();
+		return (listaPersonas.isEmpty() ? 0 : sum / listaPersonas.size());
 	}
 
 	public List<Persona> getListaPersonas() {
