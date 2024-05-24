@@ -30,7 +30,7 @@ public class MainInterface extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					MainInterface frame = new MainInterface("NombreDeEjemplo", 4, 2, 2); // Testing. NO DEBE SALIR
+					MainInterface frame = new MainInterface("NombreDeEjemplo", 6, 3, 2); // Testing. NO DEBE SALIR
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -129,13 +129,13 @@ public class MainInterface extends JFrame {
 		TableColumn firstColumn = tablaPpal.getColumnModel().getColumn(0);
 		firstColumn.setPreferredWidth(tamanioColumna);
 
-		// Establecer anchura mínima de la primera celda de cada columna
+		// Establecer anchura m nima de la primera celda de cada columna
 		for (int i = 1; i < tablaPpal.getColumnCount(); i++) {
 			TableColumn columna = tablaPpal.getColumnModel().getColumn(i);
 			columna.setPreferredWidth(tamanioColumna);
 		}
 		rellenarCeros();
-		pack(); // Ajusta el tamaño de la ventana automáticamente
+		pack(); // Ajusta el tama o de la ventana autom ticamente
 		setLocationRelativeTo(null); // Centra la ventana en la pantalla
 	}
 
@@ -213,22 +213,24 @@ public class MainInterface extends JFrame {
 				groups.add(gr);
 			}
 		}
-
+		
 		// Crear personas
 		List<Persona> personas = new ArrayList<>();
+		int numero = 0;
 		for (List<Integer> listaNumeros : groups) {
-			int numero = groups.indexOf(listaNumeros) + 1;
-			personas.add(new Persona(groups.indexOf(listaNumeros), "Persona " + numero, listaNumeros));
+			
+			personas.add(new Persona(numero, "Persona " + (numero+1), listaNumeros));
+			numero++;
 		}
 
 		// Distribuir personas en grupos
 		DisposicionGrupal disposicion = Distribucion.distribuir(personas, nGrupos, nLimite);
 
-		// Extraer los grupos de la disposición
+		// Extraer los grupos de la disposici n
 		List<Grupo> gruposGenerados = disposicion.getListaGrupos();
 
 		StringBuilder message = new StringBuilder();
-		message.append("Organización óptima:\n");
+		message.append("Organizaci n  ptima:\n");
 		for (Grupo grupo : gruposGenerados) {
 			message.append(grupo.toString()).append("\n");
 		}
